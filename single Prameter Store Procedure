@@ -1,0 +1,76 @@
+****** store Procedure
+    1.      ALTER PROCEDURE [dbo].[SelectStudent]  
+            AS
+            BEGIN 
+            select * from student 
+            END
+            -- EXEC SelectStudent
+            
+   2.      ALTER Procedure [dbo].[spOneparameter]
+           @MystudentName nvarchar(50)
+
+           As
+           Begin
+            --Select * from student where student_id like '%' + @MystudentName + '%'
+            Select * from student where student_id = @MystudentName
+           End
+
+           --exec spOneparameter 1
+
+******  Home Controller   
+        public ActionResult Index()
+        {
+            var data = db.students.ToList();
+            return View(data);
+        }
+        [HttpPost]
+        public ActionResult Index(student st)
+        {
+            var MystudentName =  1;  
+            //  var data = sqldb.students.SqlQuery("select * from student ").ToList();
+            // var data = sqldb.students.SqlQuery("exec SelectStudent").ToList();
+             var data = sqldb.students.SqlQuery("spOneparameter @MystudentName", new SqlParameter("MystudentName", MystudentName)).ToList();
+            return View(data); 
+        }
+        
+        
+   ******** View Page 
+                   @model IEnumerable<StoreProcedurePracticle.Models.student>
+                    @{
+                        ViewBag.Title = "Index";
+                    }
+
+                    <h2>Index</h2>
+
+                    <p>
+                        @Html.ActionLink("Create New", "Create")
+                    </p>
+                    <table class="table">
+                        <tr>
+                            <th>
+                                @Html.DisplayNameFor(model => model.student_name)
+                            </th>
+                            <th>
+                                @Html.DisplayNameFor(model => model.student_mail)
+                            </th>
+                            <th></th>
+                        </tr>
+
+                    @foreach (var item in Model) {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.student_name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.student_mail)
+                            </td>
+                            <td>
+                                @Html.ActionLink("Edit", "Edit", new { id=item.student_id }) |
+                                @Html.ActionLink("Details", "Details", new { id=item.student_id }) |
+                                @Html.ActionLink("Delete", "Delete", new { id=item.student_id })
+                            </td>
+                        </tr>
+                    }
+
+                    </table>
+  
