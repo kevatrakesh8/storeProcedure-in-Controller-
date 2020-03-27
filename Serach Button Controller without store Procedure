@@ -1,0 +1,117 @@
+      
+  
+  
+  ****** Home Controller :
+
+            public ActionResult Index()
+            {
+                return View(db.students.ToList()); 
+            }
+
+            //[HttpPost]
+            //public JsonResult StuDetails(string searching, string name)
+            //{
+            //    var data = db.students.Where(m => m.student_name.Contains(searching) ||
+            //                                       m.student_mail.Contains(searching) || searching == null).ToList();
+            //    return Json(data, JsonRequestBehavior.AllowGet);
+            //}
+
+            [HttpPost]
+
+            public ActionResult StuDetails(string searching, string cars, student std)  
+            {
+                var data = db.students.Where(m => m.student_name.Contains(searching) ||                  // custom find the data 
+                                                  m.student_mail.Contains(cars) ||                        // form name attributes pass the data 
+                                                  m.student_mail.Contains(std.student_name) ||               // with object find the data 
+                                                  searching == null).ToList();                               // if any one find null value then 
+
+                return PartialView("Index", data);
+                 //return View("Index", data); 
+            }
+            
+            
+            
+            
+***** View Page
+                @model IEnumerable<StoreProcedurePracticle.Models.student>
+
+                @{
+                    ViewBag.Title = "Index";
+                }
+
+                <script src="~/Scripts/jquery-1.10.2.js"></script>
+                <script src="~/Scripts/jquery.unobtrusive-ajax.js"></script>
+
+                <h2>Index</h2>
+
+                <p>
+                    @Html.ActionLink("Create New", "Create")
+                </p>
+
+                @*@using (Html.BeginForm("StuDetails", "SearchData", FormMethod.Get))
+                    {
+                        @Html.TextBox("searching")
+                        <select id="cars" name="cars">
+                            <option value="volvo">Volvo</option>
+                            <option value="saab">Saab</option>
+                            <option value="fiat">Fiat</option>
+                            <option value="audi">Audi</option>
+                        </select>
+                        <input type="submit" value="Search" />
+                    }*@
+
+                @using (Ajax.BeginForm("StuDetails", "SearchData", new AjaxOptions { HttpMethod = "GET", UpdateTargetId = "divEmp" }))
+                {
+                    @Html.TextBox("searching")
+                    <select id="cars" name="cars">
+                        <option value="volvo">Volvo</option>
+                        <option value="saab">Saab</option>
+                        <option value="fiat">Fiat</option>
+                        <option value="audi">Audi</option>
+                    </select>
+                    <input type="submit" value="Search" />
+
+                }
+                <table class="table">
+                    <tr>
+                        <th>
+                            @Html.DisplayNameFor(model => model.student_name)
+                        </th>
+                        <th>
+                            @Html.DisplayNameFor(model => model.student_mail)
+                        </th>
+                        <th></th>
+                    </tr>
+
+                    @foreach (var item in Model)
+                    {
+                        <tr>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.student_name)
+                            </td>
+                            <td>
+                                @Html.DisplayFor(modelItem => item.student_mail)
+                            </td>
+                            <td>
+                                @Html.ActionLink("Edit", "Edit", new { id = item.student_id }) |
+                                @Html.ActionLink("Details", "Details", new { id = item.student_id }) |
+                                @Html.ActionLink("Delete", "Delete", new { id = item.student_id })
+                            </td>
+                        </tr>
+                    }
+
+                </table>
+
+                <script type="text/javascript">
+                    function OnSuccess(response) {
+                        var message = "Person Id: " + response.PersonId;
+                        message += "\nName: " + response.Name;
+                        message += "\nGender: " + response.Gender;
+                        message += "\nCity: " + response.City;
+                        alert(message);
+                    }
+                    function OnFailure(response) {
+                        alert("Error occured.");
+                    }
+                </script>
+
