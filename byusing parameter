@@ -1,0 +1,140 @@
+*********  SQL Procedure 
+                         use RealEstateDB
+
+                          Alter proc  [dbo].[sp_serch_data_from_list] 
+                           @serach_name nvarchar(50),
+                           @serch_adress nvarchar(50),
+                           @search_city nvarchar(50),
+                           @search_status nvarchar(50),
+                           @search_type nvarchar(50),
+                           @search_falt_code nvarchar(50)
+                         as 
+                         begin 
+                              SET NOCOUNT ON;
+                              SELECT *
+                              FROM property
+                              WHERE prop_tittle LIKE '%' + @serach_name + '%' And
+                                   prop_address LIKE '%' + @serch_adress + '%' And
+                                   prop_city LIKE '%' + @search_city + '%' And
+                                   prop_status LIKE '%' + @search_status + '%' And
+                               prop_type LIKE '%' + @search_type + '%' And
+                               prop_flat_code LIKE '%' + @search_falt_code + '%' 	  
+
+                         end   
+
+                         --exec sp_serch_data_from_list 'The' , 'Ghatkopar' , 'Mumbai', 'For Sale' ,'Commercial' ,'1BHK'
+
+                         exec sp_serch_data_from_list 'The' , 'Ghatkopar' , 'Mumbai', 'For Sale' ,'Commercial' ,'1BHK'
+                         
+ **** Add Procedure in Model   
+           .edmx file > Right Clikc > Store Procedure Mapping > Update Store Procedure 
+ ****   HomeController 
+                public ActionResult Gallary(property pro)
+                      {
+                          List<property> images = new List<property>();  // must have to choose "List" Layout of "Add View."
+                          images = db.properties.ToList();
+                          return View(images);  
+                      }
+                 [HttpPost]
+                        public ActionResult Gallary(property pro, string ser_pro, string ser_area, string ser_city, string ser_buyOrsell, string ser_propType, string ser_flat )
+                        {
+
+                            string serach_name = "The";
+                            string serch_adress = "Ghatkopar";
+                            string search_city = "Mumbai";
+                            string search_status = "For Sale";
+                            string search_type = "Commercial";
+                            string search_falt_code = "1BHK";
+
+                            // Code A way
+                            //var data = db.properties.SqlQuery("sp_serch_data_from_list @serach_name , @serch_adress , @search_city , @search_status ,@search_type , @search_falt_code", 
+                            //                                   new SqlParameter("serach_name", serach_name),
+                            //                                   new SqlParameter("serch_adress", serch_adress),
+                            //                                   new SqlParameter("search_city", search_city),
+                            //                                   new SqlParameter("search_status", search_status),
+                            //                                   new SqlParameter("search_type", search_type),
+                            //                                   new SqlParameter("search_falt_code", search_falt_code)).ToList();
+                            //     
+
+                            // Code B Way
+                            SqlParameter[] sqlparams = {  new SqlParameter("serach_name", serach_name),
+                                                               new SqlParameter("serch_adress", serch_adress),
+                                                               new SqlParameter("search_city", search_city),
+                                                               new SqlParameter("search_status", search_status),
+                                                               new SqlParameter("search_type", search_type),
+                                                               new SqlParameter("search_falt_code", search_falt_code)
+                                                }; 
+                            var data = db.properties.SqlQuery("sp_serch_data_from_list @serach_name , @serch_adress , @search_city , @search_status ,@search_type , @search_falt_code", sqlparams).ToList();
+                           return base.PartialView(data );
+
+                        }
+                        
+                        
+  ******* View page  
+                   @using (Html.BeginForm("Gallary", "RealEstate", FormMethod.Post, new { enctype = "multipart/form-data", onSubmit = "", @class = "hero__form v1 filter listing-filter property-filter", @id = "nameform" }))
+                                      {
+                                          <div class="hero__form v1 filter listing-filter property-filter">
+                                              <div class="row">
+                                                  <div class="col-xl-5 col-lg-6 col-md-6 col-sm-12 col-12 py-3 pl-30 pr-0">
+                                                      <div class="input-search">
+                                                          <input type="text" name="ser_pro" id="ser_pro" placeholder="Enter Property, Location, Landmark ...">
+                                                      </div>
+                                                  </div>
+                                                  <div class="col-xl-2 col-lg-6 col-md-6 col-sm-12 col-12 py-3 pl-30 pr-0">
+                                                      <select class="hero__form-input  form-control custom-select" id="ser_area" name="ser_area">
+                                                          <option>Select Area</option>
+                                                          <option value="Ghatkopar">Ghatkopar</option>
+                                                          <option value="Vikroli">Vikroli</option>
+                                                          <option value="kurla">kurla</option>
+                                                          <option value="Mulund">Mulund</option>
+                                                          <option value="Thane">Thane</option>
+                                                          <option value="Andheri">Andheri</option>
+                                                          <option value="Badalapur">Badalapur</option>
+                                                      </select>
+                                                  </div>
+                                                  <div class="col-xl-2 col-lg-6 col-md-6 col-sm-12 col-12 py-3 pl-30 pr-0">
+                                                      <select class="hero__form-input  form-control custom-select" id="ser_city" name="ser_city">
+                                                          <option>Select City</option>
+                                                          <option value="Mumbai">Mumbai</option>
+                                                      </select>
+                                                  </div>
+                                                  <div class="col-xl-3 col-lg-6 col-md-6 col-sm-12 col-12 py-3 pl-30 pr-0">
+                                                      <div class="submit_btn">
+                                                          <button class="btn v3" type="submit" form="nameform" value="Submit">Search</button>
+
+                                                      </div>
+                                                      <div class="dropdown-filter"><span>More Filters</span></div>
+                                                  </div>
+                                                  <div class="explore__form-checkbox-list full-filter">
+                                                      <div class="row">
+                                                          <div class="col-lg-4 col-md-6 py-1 pr-30">
+                                                              <select class="hero__form-input  form-control custom-select mb-20" id="ser_buyOrsell" name="ser_buyOrsell">
+                                                                  <option>Property Status</option>
+                                                                  <option value="For Sale">For Sale</option>
+                                                                  <option value="For Rent">For Rent</option>
+                                                              </select>
+                                                          </div>
+                                                          <div class="col-lg-4 col-md-6 py-1 pr-30 pl-0">
+                                                              <select class="hero__form-input  form-control custom-select  mb-20" id="ser_propType" name="ser_propType">
+                                                                  <option>Property Type</option>
+                                                                  <option value="Commercial">Commercial</option>
+                                                                  <option value="Residential">Residential</option>
+                                                              </select>
+                                                          </div>
+                                                          <div class="col-lg-4 col-md-6 py-1 pl-0">
+                                                              <select class="hero__form-input  form-control custom-select  mb-20" id="ser_flat" name="ser_flat">
+                                                                  <option>Max rooms</option>
+                                                                  <option value="1RK">1RK  </option>
+                                                                  <option value="1BHK">1BHK</option>
+                                                                  <option value="2BHK">2BHK</option>
+                                                                  <option value="3BHK">3BHK</option>
+                                                                  <option value="4BHK">4BHK</option>
+                                                              </select>
+                                                          </div>
+
+                                                      </div>
+                                                  </div>
+                                              </div>
+                                          </div>
+                                      }
+ 
